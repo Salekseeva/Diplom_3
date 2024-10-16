@@ -6,12 +6,12 @@ from utils.generators import generate_random_email, generate_random_password
 from test_data import LOGIN_URL
 
 
-@pytest.mark.usefixtures("browser")
+@pytest.mark.usefixtures("driver")
 class TestPasswordRecovery:
 
-    def test_password_recovery(self, browser):
-        login_page = LoginPage(browser)
-        recovery_page = RecoveryPage(browser)
+    def test_password_recovery(self, driver):
+        login_page = LoginPage(driver)
+        recovery_page = RecoveryPage(driver)
 
         # Открыть страницу входа
         login_page.navigate_to_login_page(LOGIN_URL)

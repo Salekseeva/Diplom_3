@@ -12,3 +12,5 @@ class MainPageLocators:
     CREATE_BURGER = (By.XPATH, '//span[contains(text(), "Перетяните булочку")]')
     PLACE_ORDER_BUTTON = (By.XPATH, '//button[text()="Оформить заказ"]')
     ORDER_IN_PROGRESS = (By.XPATH, '//p[text()="Ваш заказ начали готовить"]')
+    # Элемент, перекрывающий всю страницу и иногда не дающий нажать на кнопку
+    MODAL_OVERLAY_ELEMENT = (By.XPATH, ".//div[contains(@class, 'Modal_modal_overlay__x2ZCr')]")

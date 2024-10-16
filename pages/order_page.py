@@ -1,48 +1,57 @@
 # pages/order_page.py
-from selenium.webdriver.common.by import By
 from locators.order_page_locators import OrderPageLocators
 from pages.base_page import BasePage
+from selenium.common.exceptions import TimeoutException
+import allure
 
 
 class OrderPage(BasePage):
-    def __init__(self, browser):
-        super().__init__(browser)
+    def __init__(self, driver):
+        super().__init__(driver)
 
+    @allure.step("Click on 'Лента заказов'")
     def open_order_feed(self):
-        self.click_element(OrderPageLocators.ORDER_FEED_BUTTON)
+        self.find_until_all_elements_located(OrderPageLocators.NAVIGATE)
+        self.click_element_if_visible(OrderPageLocators.ORDER_FEED_BUTTON)
 
+    @allure.step("Click on first order in 'Лента заказов'")
     def click_order_in_list(self):
-        self.click_element(OrderPageLocators.ORDER_IN_LIST)
+        self.click_element_compatible(OrderPageLocators.ORDER_IN_LIST)
 
-    def get_last_order_number(self):
-        return self.get_text(OrderPageLocators.LAST_ORDER_NUMBER)
-
-    def get_total_orders(self):
-        return int(self.get_text(OrderPageLocators.TOTAL_ORDERS))
-
-    def get_today_total_orders(self):
-        return int(self.get_text(OrderPageLocators.TODAY_TOTAL_ORDERS))
-
-    def get_order_in_progress(self):
-        return self.get_text(OrderPageLocators.ORDER_IN_PROGRESS)
-
+    @allure.step("Check if modal window with order info is open")
     def is_order_info_displayed(self) -> bool:
-        """
-        Проверяет, открыто ли модальное окно с информацией о заказе.
-        """
-        modal = self.browser.find_element(*OrderPageLocators.ORDER_INFO)
+        modal = self.driver.find_element(*OrderPageLocators.ORDER_INFO)
         return modal.is_displayed()  # Проверка, что модалка отображается
 
-    def click_on_order(self, order_number: int):
-        """
-        Кликает на заказ с указанным номером.
-        """
-        order_element = self.browser.find_element(By.XPATH, f"//div[contains(text(), '{order_number}')]")
-        order_element.click()
+    @allure.step("Get last order number")
+    def get_last_order_number(self):
+        try:
+            self.wait_for_element_is_clickable(OrderPageLocators.LAST_ORDER_NUMBER, 20)
+            order_text = self.get_text(OrderPageLocators.LAST_ORDER_NUMBER)
+            last_order_number = order_text[2:]
+            return last_order_number
+        except TimeoutException:
+            order_text = self.get_text(OrderPageLocators.LAST_ORDER_NUMBER)
+            last_order_number = order_text[2:]
+            return last_order_number
+        except Exception as e:
+            # Обработка других исключений
+            print(f"An unexpected error occurred: {e}")
+            return None
 
-    def get_text(self, locator) -> str:
-        """
-        Получает текст элемента, указанный локатором.
-        """
-        element = self.browser.find_element(*locator)
-        return element.text
+    @allure.step("Get number of total orders")
+    def get_total_orders(self):
+        element = OrderPageLocators.TOTAL_ORDERS
+        self.wait_for_element_is_clickable(element, 20)
+        return int(self.get_text(element))
+
+    @allure.step("Get number of orders today")
+    def get_today_total_orders(self):
+        element = OrderPageLocators.TODAY_TOTAL_ORDERS
+        self.wait_for_element_is_clickable(element, 20)
+        return int(self.get_text(element))
+
+    @allure.step("Get number of order in progress")
+    def get_order_in_progress(self):
+        order_text = self.get_text(OrderPageLocators.LAST_ORDER_NUMBER)
+        return order_text[2:]
